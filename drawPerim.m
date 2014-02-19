@@ -8,15 +8,5 @@ function [image, perim] = drawPerim(originalImage, binaryImage, oldPerim)
      end
      
      
-     
-     imshow(perim);
-     
      image=originalImage;
      image(perim)=255;
-     
-     %I2 = originalImage; I2(perim) = 255;
-     %image = I2;
-     %I2 = originalImage; I2(perim) = 0;
-     %image(:,:,2) = I2;
-     %I2 = originalImage; I2(perim) = 0;
-     %image(:,:,3) = I2;
