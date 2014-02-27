@@ -54,7 +54,6 @@ for k = 1 : size(filenames, 1)
     [frame,oldPerim]=drawPerim(frame,Bim,oldPerim);
     [frame, centres] = drawCentres(frame, Bim);
     if length(centres) ~= 0
-        centres
         path = [path ; [centres(1, 1) centres(1,2)]];
     end
     imshow(frame);
