@@ -1,4 +1,4 @@
-function deleteLostTracks(tracks)
+function deleteLostTracks
 if isempty(tracks)
     return;
 end
@@ -12,8 +12,7 @@ totalVisibleCounts = [tracks(:).totalVisibleCount];
 visibility = totalVisibleCounts ./ ages;
 
 % Find the indices of 'lost' tracks.
-lostInds = (ages < ageThreshold & visibility < 0.6) | ...
-    [tracks(:).consecutiveInvisibleCount] >= invisibleForTooLong;
+lostInds = (ages < ageThreshold & visibility < 0.6) | [tracks(:).consecutiveInvisibleCount] >= invisibleForTooLong;
 
 % Delete lost tracks.
 tracks = tracks(~lostInds);
