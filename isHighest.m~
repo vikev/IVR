@@ -1,26 +1,18 @@
-function isHighest(path)
-
-     % Knowing a path so far cehck if that's the highest point of the path
+function is = isHighest(path)
+    
+     % Knowing a path so far check if that's the highest point of the path
      
-     v = 
-
-     % Clean binary image
-     binaryImage = bwmorph(binaryImage, 'clean');
+     % Currently just checking if the current and previous distance per 
+     % frame is less than 1 
      
-     % Label objects in binary image
-     labeled = bwlabel(binaryImage, 4);
+     is = false;
      
-     % Get the centres of labeled object
-     s  = regionprops(labeled, 'boundingbox');
+     dCur = distance(path(end, 1), path(end-1, 1), path(end, 2), path(end-1, 2));
      
-     hold on;
-     for k = 1 : length(s)
-        thisBB = s(k).BoundingBox;
-        rectangle('Position', [thisBB(1),thisBB(2),thisBB(3),thisBB(4)], 'EdgeColor','b','LineWidth', 1);
-        %if prev(2) <= cur(2)
-        if isHeighest(path)
-            line([path(end, 1), path(end, 1)+100],[thisBB(2), thisBB(2)],'Color',[1 0 0],'LineWidth',1);
-        end
+     dPre = distance(path(end-1, 1), path(end-2, 1), path(end-1, 2), path(end-2, 2));
+   
+     
+     if abs(path(end, 2) - path(end-1, 2)) <= 0.15 || dCur < 1
+        is = true;
      end
-     hold off;
      
