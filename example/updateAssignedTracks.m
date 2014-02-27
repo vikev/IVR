@@ -1,4 +1,4 @@
-function updateAssignedTracks(assignments)
+function updateAssignedTracks
 numAssignedTracks = size(assignments, 1);
 for i = 1:numAssignedTracks
     trackIdx = assignments(i, 1);

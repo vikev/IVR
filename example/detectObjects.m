@@ -1,4 +1,4 @@
-function [centroids, bboxes, mask] = detectObjects(frame,obj)
+function [centroids, bboxes, mask] = detectObjects
 
 % Detect foreground.
 mask = obj.detector.step(frame);
