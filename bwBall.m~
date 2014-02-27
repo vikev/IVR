@@ -11,11 +11,8 @@ Min=ones(x,y)*10000;
 Max=zeros(x,y);
 oldPerim = zeros(x,y);
 
-%currently adds everything into one array
+% currently adds everything into one array
 path = []; 
-
-% currently adds everythign into one array
-hPoints = [];
 
 % Read one frame at a time.
 for k = 1 : size(filenames, 1)
@@ -65,16 +62,17 @@ for k = 1 : size(filenames, 1)
     % Extend path array
     % TODO only works if one object on the frame
     if ~isempty(centres)
+        for i=1 
         path = [path ; [centres(1, 1) centres(1,2)]];
     end
     
     % Draw path of the object on the frame
     %drawPath(path);
     
-    % Check if the current centre is <= than past centre position
-    % and if yes -> draw the heighest point of the object
-    if length(path) > 2
-        hPoints = drawIfHighest(path, Bim);
+    % Draw highest point if the object is on it's highest point
+    [p1, p2] = size(path);
+    if p1 > 2
+        drawHighest(path, Bim);
     end
     
     %h2 = rectangle('position',[ 150 40 80 70]);
