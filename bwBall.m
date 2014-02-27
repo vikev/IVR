@@ -51,16 +51,23 @@ for k = 1 : size(filenames, 1)
     
     
     Bim = bwmorph(Bim, 'erode', 2);    
-    [frame,oldPerim]=drawPerim(frame,Bim,oldPerim);
-    [frame, centres] = drawCentres(frame, Bim);
+    [frame,oldPerim] = drawPerim(frame,Bim,oldPerim);
+    
+    % Show frame
+    imshow(frame);
+    
+    % Draw object's centres on the frame
+    centres = drawCentres(Bim);
+    
+    % Extend path array
     if length(centres) ~= 0
         path = [path ; [centres(1, 1) centres(1,2)]];
     end
-    imshow(frame);
+    
+    % Draw paths of the objects on the frame
     drawPath(path);
     %h2 = rectangle('position',[ 150 40 80 70]);
     %set(h2,'EdgeColor','w','LineWidth',2)
-    %line([0,100],[100,0],'Color',[1 0 0],'LineWidth',2)
     drawnow('expose');
     %disp(['showing frame ' num2str(k)]);
 end
