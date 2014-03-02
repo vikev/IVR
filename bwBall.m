@@ -2,55 +2,63 @@ function bwBall(file_dir,learnSize)
 filenames = dir([file_dir '*.jpg']);
 
 frame = imread([file_dir filenames(1).name]);
-figure(2); 
+figure(2);
 h1 = imshow(frame);
 [x,y,rS]=size(frame);
-
-M=zeros(x,y);
-Min=ones(x,y)*10000;
-Max=zeros(x,y);
+gray=rgb2gray(frame);
+M=gray;
+Min=gray;
+Max=gray;
 oldPerim = zeros(x,y);
 
+%how many frames back should compare
+back=2;
+prevFrames(:,:,back)=gray;
+updates=0;
 % currently adds everything into one array
-path = []; 
+path = [];
 
 % Read one frame at a time.
-for k = 1 : size(filenames, 1)
+for k = 2 : size(filenames, 1)
+    disp(k);
     frame = imread([file_dir filenames(k).name]);
+    gray=rgb2gray(frame);
     Bim = zeros(x,y);
-    frame2 = myrgb2gray(frame);
     
-    if k<=learnSize
-      for i=1:x,
-        for j=1:y
-            M(i,j)=M(i,j)+frame2(i,j);
-            if(Min(i,j)>frame2(i,j))
-                Min(i,j)=frame2(i,j);
-            end
-            if(Max(i,j)<frame2(i,j))
-                Max(i,j)=frame2(i,j);
-            end
-        end
-      end
+    diff=abs(gray-prevFrames(:,:,back));
+    diff(diff<5)=0;
+    diff(diff>0)=1;
+    diff=bwmorph(diff, 'erode', 1);
+    for i = back : 2
+        prevFrames(:,:,i)=prevFrames(:,:,i-1);
+    end
+    prevFrames(:,:,1)=gray;
+    
+    %if k<=learnSize
+    if diff==zeros(x,y)
+        updates=updates+1;
+        M=M+gray;
+        Min=min(Min,gray);
+        Max=max(Max,gray);
     end
     
-    if k==learnSize
-        M=M./learnSize;
-    end
+  %  if k==learnSize
+    %    M=M./updates;
+   % end
     
     if k>learnSize
         for i=1:x,
-        for j=1:y
-            if frame2(i,j)<Min(i,j)-5 || frame2(i,j)>Max(i,j)+5
-                Bim(i,j)=1;
+            for j=1:y
+                if gray(i,j)<Min(i,j)-5 || gray(i,j)>Max(i,j)+5
+                    Bim(i,j)=1;
+                end
             end
         end
-        end
-      
+        
     end
     
     
-    Bim = bwmorph(Bim, 'erode', 2);    
+    Bim = bwmorph(Bim, 'erode', 2);
     [frame,oldPerim] = drawPerim(frame,Bim,oldPerim);
     
     % Show frame
