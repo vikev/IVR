@@ -20,8 +20,6 @@ objects=struct('path',{},'lastSeen',{});
 %back=2;
 prevFrames(:,:,back)=gray;
 updates=0;
-% currently adds everything into one array
-path = [];
 
 % Read one frame at a time.
 for k = 2 : size(filenames, 1)
@@ -53,7 +51,6 @@ for k = 2 : size(filenames, 1)
     
     
     Bim = bwmorph(Bim, 'erode', 2);
-    [frame,oldPerim] = drawPerim(frame,Bim,oldPerim);
     
     % Show frame
     imshow(frame);
@@ -62,15 +59,12 @@ for k = 2 : size(filenames, 1)
     %truesize
     
     % Draw object's centres on the frame
-    centres = drawCentres(Bim);
+    centres = drawCentresBoxes(Bim);
     
     updateObjects();
     removeLostObjects();
     drawPaths();
     
-
-    %h2 = rectangle('position',[ 150 40 80 70]);
-    %set(h2,'EdgeColor','w','LineWidth',2)
     drawnow('expose');
     
 end
@@ -116,10 +110,10 @@ end
             % Draw highest point if the object is on it's highest point
             path=objects(i).path;
             drawPath(path);
-            [p1, p2] = size(path);
-            if p1 > 2
-                drawHighest(path, Bim);
-            end
+            %[p1, p2] = size(path);
+            %if p1 > 2
+            %    drawHighest(path, Bim);
+            %end
         end
     end
 
