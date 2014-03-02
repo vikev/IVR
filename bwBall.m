@@ -66,31 +66,16 @@ for k = 2 : size(filenames, 1)
     removeLostObjects();
     drawPaths();
     
-    % Extend path array
-    % TODO only works if one object on the frame
-    %if ~isempty(centres)
-     %   path = [path ; [centres(1, 1) centres(1,2)]];
-    %end
-    
-    % Draw path of the object on the frame
-    %drawPath(path);
-    
-    % Draw highest point if the object is on it's highest point
-    [p1, p2] = size(path);
-    if p1 > 2
-        drawHighest(path, Bim);
-    end
-    
     %h2 = rectangle('position',[ 150 40 80 70]);
     %set(h2,'EdgeColor','w','LineWidth',2)
     drawnow('expose');
-    %disp(['showing frame ' num2str(k)]);
+    
 end
 
     function updateObjects()
         for i=1 : size(centres,1)
             assigned = false;
-
+            
             for j=1 : size(objects,2)
                 if(objects(j).lastSeen<k)
                     x1=objects(j).path(end,1);
@@ -110,18 +95,29 @@ end
                 objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k);
             end
         end
-       %disp(objects);
+        %disp(objects);
     end
 
     function removeLostObjects()
-        ages = [objects(:).lastSeen];
-        %   disp(ages);
+        rm=[];
+        for i=1 : size(objects,2)
+            if(objects(i).lastSeen<k-10)
+                rm=[rm i];
+            end
+        end
+        objects(rm)=[];
     end
 
     function drawPaths()
-         for i=1 : size(objects,2)
-             drawPath(objects(i).path);
-         end
+        for i=1 : size(objects,2)
+            % Draw highest point if the object is on it's highest point
+            path=objects(i).path;
+            drawPath(path);
+            [p1, p2] = size(path);
+            if p1 > 2
+                drawHighest(path, Bim);
+            end
+        end
     end
 
 end
