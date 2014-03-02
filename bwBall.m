@@ -29,7 +29,10 @@ for k = 2 : size(filenames, 1)
     imshow(frame);
     gray=rgb2gray(frame);
     Bim = zeros(x,y);
-    if back>0
+     
+     noforeground=false;
+    if back>1
+        diff=abs(gray-prevFrames(:,:,back));
         diff=abs(gray-prevFrames(:,:,back));
         diff(diff<5)=0;
         diff(diff>0)=1;
@@ -38,8 +41,11 @@ for k = 2 : size(filenames, 1)
             prevFrames(:,:,i)=prevFrames(:,:,i-1);
         end
         prevFrames(:,:,1)=gray;
+        if diff==zeros(x,y)
+            noforeground = true;
+        end
     end
-    if k<learnSize || (back>0 && diff==zeros(x,y))
+    if k<=learnSize || (back>1 && noforeground)
         updates=updates+1;
         M=M+gray;
         Min=min(Min,gray);
