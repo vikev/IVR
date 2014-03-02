@@ -1,18 +1,23 @@
-function bwBall(file_dir,learnSize)
+function bwBall(file_dir,learnSize,back)
 filenames = dir([file_dir '*.jpg']);
 
 frame = imread([file_dir filenames(1).name]);
-figure(2);
-h1 = imshow(frame);
-[x,y,rS]=size(frame);
+figure(1);
+
+x=size(frame,1);
+y=size(frame,2);
 gray=rgb2gray(frame);
 M=gray;
 Min=gray;
 Max=gray;
 oldPerim = zeros(x,y);
 
+
+% structure where we keep our detected objects
+objects=struct('path',{},'lastSeen',{});
+
 %how many frames back should compare
-back=2;
+%back=2;
 prevFrames(:,:,back)=gray;
 updates=0;
 % currently adds everything into one array
@@ -33,7 +38,6 @@ for k = 2 : size(filenames, 1)
     end
     prevFrames(:,:,1)=gray;
     
-    %if k<=learnSize
     if diff==zeros(x,y)
         updates=updates+1;
         M=M+gray;
@@ -41,19 +45,10 @@ for k = 2 : size(filenames, 1)
         Max=max(Max,gray);
     end
     
-  %  if k==learnSize
-    %    M=M./updates;
-   % end
     
     if k>learnSize
-        for i=1:x,
-            for j=1:y
-                if gray(i,j) < Min(i,j)-5 || gray(i,j)>Max(i,j)+5
-                    Bim(i,j)=1;
-                end
-            end
-        end
-        
+        Bim(gray<Min-5)=1;
+        Bim(gray>Max+5)=1;
     end
     
     
@@ -68,6 +63,10 @@ for k = 2 : size(filenames, 1)
     
     % Draw object's centres on the frame
     centres = drawCentres(Bim);
+    
+    updateObjects();
+    removeLostObjects();
+    drawPaths();
     
     % Extend path array
     % TODO only works if one object on the frame
@@ -94,4 +93,43 @@ for k = 2 : size(filenames, 1)
     %set(h2,'EdgeColor','w','LineWidth',2)
     drawnow('expose');
     %disp(['showing frame ' num2str(k)]);
+end
+
+    function updateObjects()
+        for i=1 : size(centres,1)
+            assigned = false;
+
+            for j=1 : size(objects,2)
+                if(objects(j).lastSeen<k)
+                    x1=objects(j).path(end,1);
+                    y1=objects(j).path(end,2);
+                    x2=centres(i,1);
+                    y2=centres(i,2);
+                    dist=distance(x1,x2,y1,y2);
+                    disp(dist);
+                    if(dist<15)
+                        objects(j).path=[ objects(j).path ; [centres(i, 1) centres(i,2)]];
+                        objects(j).lastSeen=k;
+                        assigned=true;
+                    end
+                end
+            end
+            if ~assigned
+                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k);
+            end
+        end
+       %disp(objects);
+    end
+
+    function removeLostObjects()
+        ages = [objects(:).lastSeen];
+        %   disp(ages);
+    end
+
+    function drawPaths()
+         for i=1 : size(objects,2)
+             drawPath(objects(i).path);
+         end
+    end
+
 end
