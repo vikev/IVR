@@ -1,6 +1,6 @@
-function drawHighest(path, binaryImage)
+function highest = drawHighest(path, binaryImage)
 
-     % TODO only works with one object on the frame
+     highest = 0;
 
      % Clean binary image
      binaryImage = bwmorph(binaryImage, 'clean');
@@ -23,6 +23,7 @@ function drawHighest(path, binaryImage)
         if isHighest(path)
             plot(int32(path(end, 1)),int32(path(end, 2)), 'xr', 'MarkerSize',20);
             pause(3);
+            highest = 1;
         end
      end
      hold off;

@@ -14,7 +14,7 @@ oldPerim = zeros(x,y);
 
 
 % structure where we keep our detected objects
-objects=struct('path',{},'lastSeen',{},'colour',{});
+objects=struct('path',{},'lastSeen',{},'colour',{}, 'highest', 0);
 if(back>0)
     prevFrames(:,:,back)=gray;
 end
@@ -25,8 +25,7 @@ for k = 2 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
     
     normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
-    
-    imshow(frame);
+
     gray=rgb2gray(frame);
     Bim = zeros(x,y);
      
@@ -58,16 +57,20 @@ for k = 2 : size(filenames, 1)
         Bim(gray>Max+5)=1;
     end
     
-    
+    Bim = medfilt2(Bim);
     Bim = bwmorph(Bim, 'erode', 2);
     
     % Show frame
     %imshow(frame);
-    %subplot(1, 2, 1, 'align'), imshow(Bim, 'InitialMagnification', 100, 'Border','tight');
-    %subplot(1, 2, 2, 'align'), imshow(frame, 'InitialMagnification', 100, 'Border','tight');
-    %truesize
+    maskBim = Bim*255;
+    maskBim = cat(3, maskBim, maskBim, maskBim);
+    %maskNorm = normalised*255;
+    top = cat(2, frame, maskBim);
+    %bottom = cat(2, frame, maskNorm);
+    %imshow(cat(1, top, bottom));
+    imshow(top);
     
-    % Draw object's centres on the frame
+    % Draw ball's (we wish) centres on the frame
     centres = drawCentresBoxes(Bim);
     
     updateObjects();
@@ -103,7 +106,7 @@ end
                 end
             end
             if ~assigned
-                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:));
+                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0);
             end
         end
     end
@@ -111,7 +114,7 @@ end
     function removeLostObjects()
         rm=[];
         for i=1 : size(objects,2)
-            if(objects(i).lastSeen<k-10)
+            if(objects(i).lastSeen<k-20)
                 rm=[rm i];
             end
         end
@@ -119,14 +122,16 @@ end
     end
 
     function drawPaths()
-        for i=1 : size(objects,2)
+        for i = 1 : size(objects,2)
             % Draw highest point if the object is on it's highest point
             path=objects(i).path;
             drawPath(path);
-            %[p1, p2] = size(path);
-            %if p1 > 2
-            %    drawHighest(path, Bim);
-            %end
+            [p1, p2] = size(path);
+            if p1 > 2 && ~objects(i).highest
+                if drawHighest(path, Bim)
+                    objects(i).highest = 1;
+                end
+            end
         end
     end
 
