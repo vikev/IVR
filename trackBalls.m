@@ -3,56 +3,43 @@ function trackBalls(file_dir,learnSize)
 filenames = dir([file_dir '*.jpg']);
 
 frame = imread([file_dir filenames(1).name]);
-figure(2);
+figure(1);
 
 x=size(frame,1);
-y=size(frame,2);
-Min=ones(x,y)*10000;
-Max=zeros(x,y);
-mean = rgb2gray(frame);
-var=ones(x,y);
-p=0.05;
-m=1.5;
+y=size(frame,2)
+p=0.01;
+m=2.5;
 imshow(frame);
 drawnow('expose');
 
-for k = 2 : size(filenames, 1)
+gray5= rgb2gray(imread([file_dir filenames(1).name]));
+gray4=rgb2gray(imread([file_dir filenames(2).name]));
+gray3=rgb2gray(imread([file_dir filenames(3).name]));
+gray2=rgb2gray(imread([file_dir filenames(4).name]));
+gray1=rgb2gray(imread([file_dir filenames(5).name]));
+
+for k = 20 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
+    gr=rgb2gray(imread([file_dir filenames(k-3).name]));
     % Show frame
     gray = rgb2gray(frame);
-    bim = zeros(x,y);
-    if(k<=learnSize)
-        mean=mean+gray;
-        for i=1:x,
-            for j=1:y
-                if(Min(i,j)>gray(i,j))
-                    Min(i,j)=gray(i,j);
-                end
-                if(Max(i,j)<gray(i,j))
-                    Max(i,j)=gray(i,j);
-                end
-            end
-        end
-    end
-    if(k==learnSize)
-        mean=mean/learnSize;
-        var = double(abs(Min-Max)/2);
-        var=var.^2;
-    end
-    if(k>learnSize)
-        mean=p*gray+(1-p)*mean;
-        d=double(abs(mean-gray));
-        var = p*(d.^2)+(1-p)*var;
-        
-        for i=1:x
-            for j=1:y
-                if (abs(gray(i,j)-mean(i,j))/30)>m
-                    bim(i,j)=1;
-                end
-            end
-        end
-    end
-    imshow(bim);
+    
+    im=abs(gray-gr);
+    im(im<5)=0;
+    im(im>0)=255;
+    im=im2bw(im);
+    im=bwmorph(im, 'erode', 1);
+    gray5=gray4;
+    gray4=gray3;
+    gray3=gray2;
+    gray2=gray1;
+    gray1=gray;
+    
+    im=imcomplement(im);
+    figure(1);
+    imshow(im);
+    figure(2);
+    imshow(frame);
     drawnow('expose');
     
 end
