@@ -14,7 +14,7 @@ oldPerim = zeros(x,y);
 
 
 % structure where we keep our detected objects
-objects=struct('path',{},'lastSeen',{},'colour',{}, 'highest', 0);
+objects=struct('path',{},'lastSeen',{},'colour',{}, 'highest', 0, 'box', {});
 if(back>0)
     prevFrames(:,:,back)=gray;
 end
@@ -57,34 +57,40 @@ for k = 2 : size(filenames, 1)
         Bim(gray>Max+5)=1;
     end
     
-    
+    Bim = medfilt2(Bim);
     Bim = bwmorph(Bim, 'erode', 2);
     
     % Show frame
-    mask = Bim*255;
-    mask = cat(3, mask, mask, mask);
-    imshow(cat(2, mask, frame));
+    imshow(frame);
+    %maskBim = Bim*255;
+    %maskBim = cat(3, maskBim, maskBim, maskBim);
+    %maskNorm = normalised*255;
+    %top = cat(2, frame, maskBim);
+    %bottom = cat(2, frame, maskNorm);
+    %imshow(cat(1, top, bottom));
+    %imshow(top);
     
-    % Draw ball's (we wish) centres on the frame
-    centres = drawCentresBoxes(Bim);
-    
+    % Get moving objects in the frame
+    objProp = getObjects(Bim);
+    % Update object struct with a new found objects proporties
     updateObjects();
+    % Remove objects that haven't moved recently
     removeLostObjects();
-    drawPaths();
-
+    % Draw 
+    drawInfo();
     
-    %h2 = rectangle('position',[ 150 40 80 70]);
-    %set(h2,'EdgeColor','w','LineWidth',2)
-
     drawnow('expose');
     
 end
 
     function updateObjects()
-        for i=1 : size(centres,1)
+        
+        centres = cat(1, objProp.Centroid);
+        
+        for i = 1 : size(centres,1)
             assigned = false;
             
-            for j=1 : size(objects,2)
+            for j = 1 : size(objects, 2)
                 if(objects(j).lastSeen<k)
                     x1=objects(j).path(end,1);
                     y1=objects(j).path(end,2);
@@ -96,12 +102,13 @@ end
                         objects(j).path=[ objects(j).path ; [centres(i, 1) centres(i,2)]];
                         objects(j).lastSeen=k;
                         objects(j).colour=currCentreColour;
+                        objects(j).box = objProp(i).BoundingBox;
                         assigned=true;
                     end
                 end
             end
-            if ~assigned
-                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0);
+            if ~assigned && isBall(objProp(i).Perimeter, objProp(i).Area)
+                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0, 'box', objProp(i).BoundingBox);
             end
         end
     end
@@ -109,18 +116,23 @@ end
     function removeLostObjects()
         rm=[];
         for i=1 : size(objects,2)
-            if(objects(i).lastSeen<k-10)
+            if(objects(i).lastSeen<k-20)
                 rm=[rm i];
             end
         end
         objects(rm)=[];
     end
 
-    function drawPaths()
-        for i = 1 : size(objects,2)
-            % Draw highest point if the object is on it's highest point
+    function drawInfo()
+        for i = 1 : size(objects, 2)
+            % Draw ball's centre
+            drawCentres(objects(i).path(end, :));
+            % Draw bounding box
+            drawBox(objects(i).box);
+            % Draw path
             path=objects(i).path;
             drawPath(path);
+            % Draw highest point
             [p1, p2] = size(path);
             if p1 > 2 && ~objects(i).highest
                 if drawHighest(path, Bim)

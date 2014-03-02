@@ -7,7 +7,7 @@ function ball_cen = drawCentresBoxes(binaryImage)
      labeled = bwlabel(binaryImage, 4);
      
      % Get the centres of labeled object
-     s  = regionprops(L, 'centroid', 'perimeter', 'area', 'boundingbox');
+     s  = regionprops(labeled, 'centroid', 'perimeter', 'area', 'boundingbox');
      cen = cat(1, s.Centroid);
      
      % Find the number of object in the image and draw
