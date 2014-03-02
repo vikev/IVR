@@ -57,18 +57,18 @@ for k = 2 : size(filenames, 1)
         Bim(gray>Max+5)=1;
     end
     
+    Bim = bwmorph(Bim, 'close', Inf);
     Bim = medfilt2(Bim);
-    Bim = bwmorph(Bim, 'erode', 2);
     
     % Show frame
-    imshow(frame);
-    %maskBim = Bim*255;
-    %maskBim = cat(3, maskBim, maskBim, maskBim);
+    %imshow(frame);
+    maskBim = Bim*255;
+    maskBim = cat(3, maskBim, maskBim, maskBim);
     %maskNorm = normalised*255;
-    %top = cat(2, frame, maskBim);
+    top = cat(2, frame, maskBim);
     %bottom = cat(2, frame, maskNorm);
     %imshow(cat(1, top, bottom));
-    %imshow(top);
+    imshow(top);
     
     % Get moving objects in the frame
     objProp = getObjects(Bim);
