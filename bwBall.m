@@ -68,21 +68,6 @@ for k = 2 : size(filenames, 1)
     removeLostObjects();
     drawPaths();
     
-    % Extend path array
-    % TODO only works if one object on the frame
-    if ~isempty(centres)
-        path = [path ; [centres(1, 1) centres(1,2)]];
-        %if length(path) > 3
-        %    dis = distance(path(end-1, 1), centres(1,1), path(end-1, 2), centres(1,2));
-        %    if dis > 10
-        %        dis
-        %    end
-        %end
-    end
-    
-    % Draw path of the object on the frame
-    drawPath(path);
-    
     % Draw highest point if the object is on it's highest point
     %[p1, p2] = size(path);
     %if p1 > 2
@@ -127,7 +112,7 @@ end
     end
 
     function drawPaths()
-         for i=1 : size(objects,2)
+         for i = 1 : size(objects,2)
              drawPath(objects(i).path);
          end
     end
