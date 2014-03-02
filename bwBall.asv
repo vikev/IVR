@@ -19,6 +19,8 @@ if(back>0)
     prevFrames(:,:,back)=gray;
 end
 updates=0;
+% currently adds everything into one array
+path = [];
 
 % Read one frame at a time.
 for k = 2 : size(filenames, 1)
@@ -54,6 +56,7 @@ for k = 2 : size(filenames, 1)
     
     
     Bim = bwmorph(Bim, 'erode', 2);
+    [frame,oldPerim] = drawPerim(frame,Bim,oldPerim);
     
     % Show frame
     %imshow(frame);
@@ -62,16 +65,15 @@ for k = 2 : size(filenames, 1)
     %truesize
     
     % Draw object's centres on the frame
-    centres = drawCentresBoxes(Bim);
+    centres = drawCentres(Bim);
     
     updateObjects();
     removeLostObjects();
     drawPaths();
-
+    
     
     %h2 = rectangle('position',[ 150 40 80 70]);
     %set(h2,'EdgeColor','w','LineWidth',2)
-
     drawnow('expose');
     
 end
@@ -87,7 +89,8 @@ end
                     x2=centres(i,1);
                     y2=centres(i,2);
                     dist=distance(x1,x2,y1,y2);
-                    currCentreColour=normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:);
+                   
+                   currCentreColour=normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:);
                     if(dist<15&&isCloseRGBVal(objects(j).colour,currCentreColour))
                         objects(j).path=[ objects(j).path ; [centres(i, 1) centres(i,2)]];
                         objects(j).lastSeen=k;
@@ -97,9 +100,10 @@ end
                 end
             end
             if ~assigned
-                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:));
+                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2))));
             end
         end
+        %disp(objects);
     end
 
     function removeLostObjects()
@@ -117,25 +121,17 @@ end
             % Draw highest point if the object is on it's highest point
             path=objects(i).path;
             drawPath(path);
-            %[p1, p2] = size(path);
-            %if p1 > 2
-            %    drawHighest(path, Bim);
-            %end
+            [p1, p2] = size(path);
+            if p1 > 2
+                drawHighest(path, Bim);
+            end
         end
     end
-
+    
     function is = isCloseRGBVal(pixel1, pixel2)
         is=true;
-        thresh=10;
-        if(abs(pixel1(1,1,1)-pixel2(1,1,1))>thresh)
-            is=false;
-        end
-        if(abs(pixel1(1,1,2)-pixel2(1,1,2))>thresh)
-            is=false;
-        end
-        if(abs(pixel1(1,1,3)-pixel2(1,1,3))>thresh)
-            is=false;
-        end
+        if abs(pixel1(1,1,1)-pixel2(1,1,1))>10
+            
     end
 
 end
