@@ -80,7 +80,6 @@ end
                     x2=centres(i,1);
                     y2=centres(i,2);
                     dist=distance(x1,x2,y1,y2);
-                    disp(dist);
                     if(dist<15)
                         objects(j).path=[ objects(j).path ; [centres(i, 1) centres(i,2)]];
                         objects(j).lastSeen=k;
@@ -92,7 +91,6 @@ end
                 objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k);
             end
         end
-        %disp(objects);
     end
 
     function removeLostObjects()
