@@ -7,14 +7,16 @@ function cen = drawCentres(binaryImage)
      labeled = bwlabel(binaryImage, 4);
      
      % Get the centres of labeled object
-     s  = regionprops(labeled, 'centroid');
+     s  = regionprops(labeled, 'centroid', 'perimeter');
      cen = cat(1, s.Centroid);
+     %sol = cat(1, s.Perimeter);
      
      % Find the number of object in the image and draw
      % each of their centres on the frame
      nrCentres = length(s);
      hold on;
      for i = 1 : nrCentres
+        %sol(i)
         plot(int32(cen(i,1)),int32(cen(i, 2)),'o');
      end
      hold off;

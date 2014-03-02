@@ -25,7 +25,6 @@ path = [];
 
 % Read one frame at a time.
 for k = 2 : size(filenames, 1)
-    
     frame = imread([file_dir filenames(k).name]);
     gray=rgb2gray(frame);
     Bim = zeros(x,y);
@@ -58,6 +57,9 @@ for k = 2 : size(filenames, 1)
     
     % Show frame
     imshow(frame);
+    %subplot(1, 2, 1, 'align'), imshow(Bim, 'InitialMagnification', 100, 'Border','tight');
+    %subplot(1, 2, 2, 'align'), imshow(frame, 'InitialMagnification', 100, 'Border','tight');
+    %truesize
     
     % Draw object's centres on the frame
     centres = drawCentres(Bim);
@@ -66,6 +68,7 @@ for k = 2 : size(filenames, 1)
     removeLostObjects();
     drawPaths();
     
+
     %h2 = rectangle('position',[ 150 40 80 70]);
     %set(h2,'EdgeColor','w','LineWidth',2)
     drawnow('expose');
