@@ -1,5 +1,0 @@
-function is = isBall(P, A)
-     
-     comp = 2 * sqrt(A*pi)/P;
-     
-     

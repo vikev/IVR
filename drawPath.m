@@ -7,3 +7,4 @@ function drawPath(path)
             line([path(i, 1), path(i+1, 1)],[path(i, 2), path(i+1, 2)],'Color',[1 0 0],'LineWidth',1);
         end
      end
+     

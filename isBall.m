@@ -7,5 +7,3 @@ function is = isBall(P, A)
      end
      
      
-     
-     
