@@ -8,7 +8,7 @@ figure(1);
 x=size(frame,1);
 y=size(frame,2);
 
-objects=struct('path',{},'lastSeen',{},'colour',{}, 'highest', 0, 'box', {});
+objects=struct('path',{},'lastSeen',{},'colour',{}, 'highest', 0, 'box', {}, 'isBall', {});
 
 backgroundSum = double(zeros(x,y,3));
 foreground=zeros(x,y);
@@ -82,7 +82,7 @@ end
         foreground=bwmorph(foreground, 'close', Inf);
         
         labels = bwlabel(foreground,4);
-        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox');
+        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
         
         %remove small objects
         rm = [];
@@ -108,11 +108,11 @@ end
             drawPath(path);
             % Draw highest point
             [p1, p2] = size(path);
-            %if p1 > 2 && ~objects(i).highest
-            %    if drawHighest(path)
-            %        objects(i).highest = 1;
-            %    end
-            %end
+            if p1 > 2 && ~objects(i).highest && objects(i).isBall
+                if drawHighest(path)
+                    objects(i).highest = 1;
+                end
+            end
         end
     end
 
@@ -132,8 +132,6 @@ end
         centres = cat(1, props.Centroid);
         
         for i = 1 : size(centres,1)
-            disp(['drawing center ' '0'+i]);
-            disp([centres(i, 1) centres(i,2)]);
             drawCentres([centres(i, 1) centres(i,2)]);
             assigned = false;
             
@@ -150,12 +148,15 @@ end
                         objects(j).lastSeen=k;
                         objects(j).colour=currCentreColour;
                         objects(j).box = props(i).BoundingBox;
+                        if(isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity))
+                            objects(j).isBall=true;
+                        end
                         assigned=true;
                     end
                 end
             end
             if ~assigned
-                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0, 'box', props(i).BoundingBox);
+                objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false);
             end
         end
         
