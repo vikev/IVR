@@ -7,5 +7,5 @@ function s = getObjects(binaryImage)
      labeled = bwlabel(binaryImage, 4);
      
      % Get the centres of labeled object
-     s  = regionprops(labeled, 'centroid', 'perimeter', 'area', 'boundingbox');
+     s  = regionprops(labeled, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
      
