@@ -1,9 +1,10 @@
 function is = isBall(P, A)
-     
-     is = false;
-     comp = 2 * sqrt(A*pi)/P;
-     if comp > 0.95 && A > 50
-         is = true;
-     end
-     
-     
+is = false;
+if P>20 && A>100
+    comp = 2 * sqrt(A*pi)/P;
+    roundness =  4*pi*A/P^2;
+    disp('vals:');
+    if (comp > 0.90 && roundness >0.80) || (comp > 0.80 && roundness >0.90) 
+        is = true;
+    end    
+end

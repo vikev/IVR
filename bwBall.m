@@ -7,10 +7,10 @@ figure(1);
 x=size(frame,1);
 y=size(frame,2);
 gray=rgb2gray(frame);
-M=gray;
+M=uint8(zeros(x,y));
 Min=gray;
 Max=gray;
-oldPerim = zeros(x,y);
+
 
 
 % structure where we keep our detected objects
@@ -21,17 +21,16 @@ end
 updates=0;
 
 % Read one frame at a time.
-for k = 2 : size(filenames, 1)
+for k = 1 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
     
     normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
-
+    
     gray=rgb2gray(frame);
     Bim = zeros(x,y);
-     
-     noforeground=false;
+    
+    noforeground=false;
     if back>1
-        diff=abs(gray-prevFrames(:,:,back));
         diff=abs(gray-prevFrames(:,:,back));
         diff(diff<5)=0;
         diff(diff>0)=1;
@@ -59,7 +58,9 @@ for k = 2 : size(filenames, 1)
     
     Bim = bwmorph(Bim, 'close', Inf);
     Bim = medfilt2(Bim);
-    
+    Bim = bwmorph(Bim, 'erode', 2);
+    Bim=bwareaopen(Bim, 100);
+
     % Show frame
     %imshow(frame);
     maskBim = Bim*255;
@@ -76,7 +77,7 @@ for k = 2 : size(filenames, 1)
     updateObjects();
     % Remove objects that haven't moved recently
     removeLostObjects();
-    % Draw objects (hopefully balls) in the current state 
+    % Draw objects (hopefully balls) in the current state
     drawInfo();
     
     drawnow('expose');
@@ -98,7 +99,7 @@ end
                     y2=centres(i,2);
                     dist=distance(x1,x2,y1,y2);
                     currCentreColour=normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:);
-                    if(dist<15&&isCloseRGBVal(objects(j).colour,currCentreColour))
+                    if(dist<15&&isCloseRGBVal(objects(j).colour,currCentreColour,3))
                         objects(j).path=[ objects(j).path ; [centres(i, 1) centres(i,2)]];
                         objects(j).lastSeen=k;
                         objects(j).colour=currCentreColour;
@@ -142,9 +143,8 @@ end
         end
     end
 
-    function is = isCloseRGBVal(pixel1, pixel2)
+    function is = isCloseRGBVal(pixel1, pixel2,thresh)
         is=true;
-        thresh=10;
         if(abs(pixel1(1,1,1)-pixel2(1,1,1))>thresh)
             is=false;
         end
