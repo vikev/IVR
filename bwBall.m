@@ -58,18 +58,16 @@ for k = 1 : size(filenames, 1)
     
     Bim = bwmorph(Bim, 'close', Inf);
     Bim = medfilt2(Bim);
-    Bim = bwmorph(Bim, 'erode', 2);
-    Bim=bwareaopen(Bim, 100);
 
     % Show frame
-    %imshow(frame);
-    maskBim = Bim*255;
-    maskBim = cat(3, maskBim, maskBim, maskBim);
+    imshow(frame);
+    %maskBim = Bim*255;
+    %maskBim = cat(3, maskBim, maskBim, maskBim);
     %maskNorm = normalised*255;
-    top = cat(2, frame, maskBim);
+    %top = cat(2, frame, maskBim);
     %bottom = cat(2, frame, maskNorm);
     %imshow(cat(1, top, bottom));
-    imshow(top);
+    %imshow(top);
     
     % Get moving objects in the frame
     objProp = getObjects(Bim);
@@ -108,7 +106,7 @@ end
                     end
                 end
             end
-            if ~assigned && isBall(objProp(i).Perimeter, objProp(i).Area)
+            if ~assigned && isBall(objProp(i).Perimeter, objProp(i).Area, objProp(i).Eccentricity)
                 objects(end+1)=struct('path',[[centres(i, 1) centres(i,2)]],'lastSeen',k,'colour',normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0, 'box', objProp(i).BoundingBox);
             end
         end
