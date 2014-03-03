@@ -78,8 +78,9 @@ end
         foreground(abs(frameD(:,:,2)-background(:,:,2)) > 8)=1;
         foreground(abs(frameD(:,:,3)-background(:,:,3)) > 8)=1;
         
-        foreground=bwmorph(foreground, 'erode', 1);
-        foreground=bwmorph(foreground, 'close', Inf);
+        foreground = bwmorph(foreground, 'erode', 1);
+        foreground = bwmorph(foreground, 'close', Inf);
+        foreground = medfilt2(foreground);
         
         labels = bwlabel(foreground,4);
         props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
@@ -98,6 +99,7 @@ end
 
 % dispaly paths, centroids and centers for every object in objects struct
     function drawInfo()
+        needPause = 0;
         for i = 1 : size(objects, 2)
             % Draw ball's centre
             drawCentres(objects(i).path(end, :));
@@ -111,8 +113,12 @@ end
             if p1 > 2 && ~objects(i).highest && objects(i).isBall
                 if drawHighest(path)
                     objects(i).highest = 1;
+                    needPause = 1;
                 end
             end
+        end
+        if needPause == 1
+            pause(3);
         end
     end
 
