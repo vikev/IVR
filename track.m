@@ -183,13 +183,7 @@ function track(file_dir,learnSize,lookBack)
     % check two rgb pixels if they are close enough.
     function is = isCloseRGBVal(pixel1, pixel2,thresh)
         is = true;
-        if abs(pixel1(1, 1, 1) - pixel2(1, 1, 1)) > thresh
-            is = false;
-        end
-        if abs(pixel1(1, 1, 2) - pixel2(1, 1, 2)) > thresh
-            is = false;
-        end
-        if abs(pixel1(1, 1, 3) - pixel2(1, 1, 3)) > thresh
+        if abs(pixel1(1, 1, :) - pixel2(1, 1, :)) > thresh
             is = false;
         end
     end
