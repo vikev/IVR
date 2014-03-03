@@ -1,6 +1,6 @@
 function drawPath(path) 
+     % Draw the path by drawing lines between two lines in path array  
      
-     % Show the path by drawing lines between two lines in path array  
      n = length(path);
      if n > 2
         for i = 1 : n-1
