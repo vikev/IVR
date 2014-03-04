@@ -12,7 +12,9 @@ if path(end-1, 2) < path(end, 2)
     
     % If sine is less than or equal to 0 -> ball no longer
     % moves up
-    if sin_alpha <= 0
+    % Also check if the ball is not moving down to fast to be at
+    % the highest point
+    if sin_alpha <= 0 && v1 >= -1
         is = true;
     end
 end

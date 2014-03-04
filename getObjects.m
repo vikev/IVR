@@ -8,4 +8,3 @@ function s = getObjects(binaryImage)
      
      % Get information about every object
      s  = regionprops(labeled, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
-     
