@@ -161,18 +161,19 @@ end
         
         for i = 1 : size(centres,1)
             assigned = false;
-            centrePixel=im2double(frame(uint8(centres(i, 1)),uint8(centres(i, 2)),:));
+            c1 = min(centres(i, 1),y-1);
+            c2 = min(centres(i, 2),x-1);
+            centrePixel=im2double(frame(uint8(c1),uint8(c2),:));
             currCentreColour = bsxfun(@rdivide, centrePixel, sum(centrePixel,3,'native'));
             for j = 1 : size(objects, 2)
                 if objects(j).lastSeen < k
                     x1 = objects(j).path(end,1);
                     y1 = objects(j).path(end,2);
-                    x2 = centres(i,1);
-                    y2 = centres(i,2);
-                    dist = distance(x1,x2,y1,y2);
+                   
+                    dist = distance(x1,c1,y1,c2);
                     
                     if dist < 20 && isCloseRGBVal(objects(j).colour, currCentreColour,5)
-                        objects(j).path = [objects(j).path; [centres(i, 1) centres(i,2)]];
+                        objects(j).path = [objects(j).path; [c1 c2]];
                         objects(j).lastSeen = k;
                         objects(j).colour = currCentreColour;
                         objects(j).box = props(i).BoundingBox;
@@ -189,7 +190,7 @@ end
                 end
             end
             if ~assigned
-                objects(end + 1) = struct('path', [[centres(i, 1) centres(i,2)]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false, 'ballCount', 0);
+                objects(end + 1) = struct('path', [[c1 c2]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false, 'ballCount', 0);
             end
         end 
     end
