@@ -11,14 +11,14 @@ filenames = dir([file_dir '*.jpg']);
 frame = imread([file_dir filenames(1).name]);
 figure(1);
 
-x = size(frame,1);
-y = size(frame,2);
+y = size(frame,1);
+x = size(frame,2);
 
 objects = struct('path', {}, 'lastSeen', {}, 'colour', {}, 'highest', 0, 'box', {}, 'isBall', {}, 'ballCount', 0);
 
-backgroundSum = double(zeros(x, y, 3));
-foreground = zeros(x, y);
-diff = zeros(x, y);
+backgroundSum = double(zeros(y, x, 3));
+foreground = zeros(y, x);
+diff = zeros(y, x);
 updated = 0;
 frameD = double(frame);
 
@@ -62,13 +62,13 @@ for k = 1 : size(filenames, 1)
     end
     
     if k > learnSize && lookBack > 0
-        diff=zeros(x, y);
+        diff=zeros(y, x);
         diff(abs(frameD(:, :, 1) - frameBuff(:, :, 1, lookBack)) > 5) = 1;
         diff(abs(frameD(:, :, 2) - frameBuff(:, :, 2, lookBack)) > 5) = 1;
         diff(abs(frameD(:, :, 3) - frameBuff(:, :, 3, lookBack)) > 5) = 1;
         diff = bwmorph(diff, 'erode', 2);
         
-        if diff == zeros(x,y)
+        if diff == zeros(y,x)
             background = (background + 2*frameD)/3;
             updated = updated + 1;
             
@@ -86,7 +86,7 @@ end
 
     % this function compares the current frame to the estimated backgroung value and returns the finds foreground objects
     function props = extractForegroundObjects()
-        foreground = zeros(x,y);
+        foreground = zeros(y,x);
         foreground(abs(frameD(:, :, 1) - background(:, :, 1)) > 8) = 1;
         foreground(abs(frameD(:, :, 2) - background(:, :, 2)) > 8) = 1;
         foreground(abs(frameD(:, :, 3) - background(:, :, 3)) > 8) = 1;
@@ -161,8 +161,8 @@ end
         
         for i = 1 : size(centres,1)
             assigned = false;
-            c1 = min(centres(i, 1),y-1);
-            c2 = min(centres(i, 2),x-1);
+            c1 = min(centres(i, 1),x-1);
+            c2 = min(centres(i, 2),y-1);
             centrePixel=im2double(frame(uint8(c1),uint8(c2),:));
             currCentreColour = bsxfun(@rdivide, centrePixel, sum(centrePixel,3,'native'));
             for j = 1 : size(objects, 2)

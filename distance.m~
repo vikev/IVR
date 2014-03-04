@@ -1,3 +1,0 @@
-function d = distance(path, binaryImage)
-
-     % TODO only works with one object on the frame

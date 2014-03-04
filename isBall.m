@@ -2,6 +2,12 @@ function is = isBall(P, A, E)
     % Determine if the object is ball or not
     % given the perimeter P,
     % area A and eccentricity E of the object
+    
+    MIN_COMP = 0.94;
+    MIN_AREA = 50;
+    MAX_ECC = 0.75;
+    MIN_SUM = 1.6;
+    MAX_SUM = 1.7;
     is = false;
     
     % Calculate the compactness of the object
@@ -18,6 +24,6 @@ function is = isBall(P, A, E)
     %  - The sum of compactness and eccentricity is between
     %    1.6 and 1.7 (found by performing a lot of tests)
     % 0.948 no more
-    if comp > 0.94 && A > 50 && E < 0.75 && 1.6 <= sum && sum <= 1.7
+    if comp > MIN_COMP && A > MIN_AREA && E < MAX_ECC && MIN_SUM <= sum && sum <= MAX_SUM
         is = true;
     end

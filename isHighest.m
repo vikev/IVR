@@ -1,6 +1,8 @@
 function is = isHighest(path)
 % Knowing a path so far check if that's the highest point of the path
 
+MAX_SIN_ALPHA = 0.1;
+MIN_SPEED = -1;
 is = false;
 
 % Find the point where the ball stops moving up
@@ -14,7 +16,7 @@ if path(end-1, 2) < path(end, 2)
     % moves up
     % Also check if the ball is not moving down to fast to be at
     % the highest point
-    if sin_alpha <= 0 && v1 >= -1
+    if sin_alpha < MAX_SIN_ALPHA && v1 >= MIN_SPEED
         is = true;
     end
 end
