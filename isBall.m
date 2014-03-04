@@ -6,6 +6,7 @@ function is = isBall(P, A, E)
     
     % Calculate the compactness of the object
     comp = 2 * sqrt(A*pi)/P;
+
     % Calculate the sum of compactness and eccentricity
     sum = comp + E;
     

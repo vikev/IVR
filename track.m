@@ -1,5 +1,8 @@
-function track(file_dir,learnSize,lookBack,view)
+function track(file_dir,learnSize,minArea,lookBack,view)
 
+if minArea<50
+    minArea=50;
+end
 filenames = dir([file_dir '*.jpg']);
 
 frame = imread([file_dir filenames(1).name]);
@@ -25,7 +28,7 @@ end
 for k = 1 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
     frameD = double(frame);
-    normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
+    %normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
     if k<=learnSize
         updated=updated+1;
         backgroundSum=frameD+backgroundSum;
@@ -96,7 +99,7 @@ end
         %remove small objects
         rm = [];
         for i = 1 : length (props)
-            if props(i).Area < 50
+            if props(i).Area < minArea
                 rm = [rm i];
             end
         end
@@ -150,17 +153,18 @@ end
         for i = 1 : size(centres,1)
             %drawCentres([centres(i, 1) centres(i,2)]);
             assigned = false;
-            
+           centrePixel=im2double(frame(uint8(centres(i, 1)),uint8(centres(i, 2)),:));
+            currCentreColour = bsxfun(@rdivide, centrePixel, sum(centrePixel,3,'native'));
+            % currCentreColour = normalised(uint8(centres(i, 1)), uint8(centres(i,2)), :);
             for j = 1 : size(objects, 2)
-                
                 if objects(j).lastSeen < k
                     x1 = objects(j).path(end,1);
                     y1 = objects(j).path(end,2);
                     x2 = centres(i,1);
                     y2 = centres(i,2);
                     dist = distance(x1,x2,y1,y2);
-                    currCentreColour = normalised(uint8(centres(i, 1)), uint8(centres(i,2)), :);
-                    if dist < 30 && isCloseRGBVal(objects(j).colour, currCentreColour,5)
+                    
+                    if dist < 20 && isCloseRGBVal(objects(j).colour, currCentreColour,5)
                         objects(j).path = [objects(j).path; [centres(i, 1) centres(i,2)]];
                         objects(j).lastSeen = k;
                         objects(j).colour = currCentreColour;
@@ -174,7 +178,7 @@ end
                 end
             end
             if ~assigned
-                objects(end + 1) = struct('path', [[centres(i, 1) centres(i,2)]], 'lastSeen', k, 'colour', normalised(uint8(centres(i, 1)),uint8(centres(i,2)),:), 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false);
+                objects(end + 1) = struct('path', [[centres(i, 1) centres(i,2)]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false);
             end
         end
         
