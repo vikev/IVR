@@ -25,7 +25,7 @@ if(lookBack>0)
 end
 
 % play 'video'
-for k = 1 : size(filenames, 1)
+for k = 150 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
     frameD = double(frame);
     %normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
@@ -96,7 +96,7 @@ end
         
         % Get information about the objects
         labels = bwlabel(foreground, 4);
-        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
+        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity', 'conveximage');
         
         % Remove small objects (noise)
         rm = [];
@@ -115,15 +115,19 @@ end
             % Draw ball's centre
             %drawCentres(objects(i).path(end, :));
             % Draw blue bounding box if the object is a ball
-            % red box - otherwise
-            if objects(i).isBall
-                drawBox(objects(i).box, 'b');
-            else
-                drawBox(objects(i).box, 'r');
-            end
-            % Draw path
+            % red box - otherwise and path
             path = objects(i).path;
-            drawPath(path);
+            if objects(i).isBall
+                if objects(i).lastSeen == k
+                    drawBox(objects(i).box, 'b');
+                end
+                drawPath(path, 'b');
+            else
+                if objects(i).lastSeen == k
+                    drawBox(objects(i).box, 'r');
+                end
+                drawPath(path, 'r');
+            end
             % Draw highest point
             [p1, p2] = size(path);
             if p1 > 2 && ~objects(i).highest && objects(i).isBall
@@ -170,7 +174,7 @@ end
                         objects(j).lastSeen = k;
                         objects(j).colour = currCentreColour;
                         objects(j).box = props(i).BoundingBox;
-                        if ~objects(j).isBall && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity)
+                        if ~objects(j).isBall && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity, props(i).ConvexImage)
                             objects(j).isBall = true;
                             
                         end
