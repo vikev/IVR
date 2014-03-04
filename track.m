@@ -110,7 +110,7 @@ end
         needPause = 0;
         for i = 1 : size(objects, 2)
             % Draw ball's centre
-            drawCentres(objects(i).path(end, :));
+            %drawCentres(objects(i).path(end, :));
             % Draw bounding box if the object is a ball
             if objects(i).isBall
                 drawBox(objects(i).box);
@@ -148,7 +148,7 @@ end
         centres = cat(1, props.Centroid);
         
         for i = 1 : size(centres,1)
-            drawCentres([centres(i, 1) centres(i,2)]);
+            %drawCentres([centres(i, 1) centres(i,2)]);
             assigned = false;
             
             for j = 1 : size(objects, 2)

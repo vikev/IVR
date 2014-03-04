@@ -123,6 +123,7 @@ end
     end
 
     function drawInfo()
+        needPause = 0;
         for i = 1 : size(objects, 2)
             % Draw ball's centre
             drawCentres(objects(i).path(end, :));
@@ -136,8 +137,12 @@ end
             if p1 > 2 && ~objects(i).highest
                 if drawHighest(path)
                     objects(i).highest = 1;
+                    needPause = 1;
                 end
             end
+        end
+        if needPause == 1
+            pause(3);
         end
     end
 
