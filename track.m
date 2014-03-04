@@ -132,9 +132,9 @@ end
             end
             % Draw highest point
             [p1, p2] = size(path);
-            if p1 > 2 && ~objects(i).highest && objects(i).isBall
+            if p1 > 2 && objects(i).highest == 0 && objects(i).isBall
                 if drawHighest(path)
-                    objects(i).highest = 1;
+                    objects(i).highest = path(end, 2);
                     needPause = 1;
                 end
             end
@@ -199,6 +199,8 @@ end
         rm = [];
         for i = 1 : size(objects, 2)
             if(objects(i).lastSeen < k-10)
+                Highest = objects(i).highest
+                min(objects(i).path(:,2))
                 rm = [rm i];
             end
         end
