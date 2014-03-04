@@ -1,8 +1,11 @@
 function track(file_dir,learnSize,minArea,lookBack,view)
 
+BALL_FOR_SURE = 5;
+
 if minArea<50
     minArea=50;
 end
+
 filenames = dir([file_dir '*.jpg']);
 
 frame = imread([file_dir filenames(1).name]);
@@ -11,7 +14,7 @@ figure(1);
 x = size(frame,1);
 y = size(frame,2);
 
-objects = struct('path', {}, 'lastSeen', {}, 'colour', {}, 'highest', 0, 'box', {}, 'isBall', {});
+objects = struct('path', {}, 'lastSeen', {}, 'colour', {}, 'highest', 0, 'box', {}, 'isBall', {}, 'ballCount', 0);
 
 backgroundSum = double(zeros(x, y, 3));
 foreground = zeros(x, y);
@@ -25,7 +28,7 @@ if(lookBack>0)
 end
 
 % play 'video'
-for k = 150 : size(filenames, 1)
+for k = 1 : size(filenames, 1)
     frame = imread([file_dir filenames(k).name]);
     frameD = double(frame);
     %normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
@@ -96,7 +99,7 @@ end
         
         % Get information about the objects
         labels = bwlabel(foreground, 4);
-        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity', 'conveximage');
+        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity', 'conveximage', 'MajorAxisLength', 'MinorAxisLength');
         
         % Remove small objects (noise)
         rm = [];
@@ -174,16 +177,20 @@ end
                         objects(j).lastSeen = k;
                         objects(j).colour = currCentreColour;
                         objects(j).box = props(i).BoundingBox;
-                        if ~objects(j).isBall && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity, props(i).ConvexImage)
-                            objects(j).isBall = true;
-                            
+                        vel = objects(j).path(end-1, 2) - objects(j).path(end, 2);
+                        if ~objects(j).isBall && vel > -1 && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity)
+                            if objects(j).ballCount == BALL_FOR_SURE
+                                objects(j).isBall = true;
+                            else
+                                objects(j).ballCount = objects(j).ballCount + 1;
+                            end
                         end
                         assigned = true;
                     end
                 end
             end
             if ~assigned
-                objects(end + 1) = struct('path', [[centres(i, 1) centres(i,2)]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false);
+                objects(end + 1) = struct('path', [[centres(i, 1) centres(i,2)]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false, 'ballCount', 0);
             end
         end 
     end
