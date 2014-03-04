@@ -170,7 +170,7 @@ end
                         objects(j).lastSeen = k;
                         objects(j).colour = currCentreColour;
                         objects(j).box = props(i).BoundingBox;
-                        if isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity)
+                        if ~objects(j).isBall && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity)
                             objects(j).isBall = true;
                             
                         end

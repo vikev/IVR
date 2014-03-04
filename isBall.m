@@ -17,6 +17,9 @@ function is = isBall(P, A, E)
     %  - Eccentricity is less than 0.75
     %  - The sum of compactness and eccentricity is between
     %    1.6 and 1.7 (found by performing a lot of tests)
-    if comp > 0.95 && A > 50 && E < 0.75 && 1.6 <= sum && sum <= 1.7
+    if comp > 0.95 && A >50 && E < 0.75
+        sum
+    end
+    if comp > 0.95 && A > 50 && E < 0.75 && 1.63 <= sum && sum <= 1.7
         is = true;
     end
