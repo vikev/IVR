@@ -1,10 +1,9 @@
-function is = isBall(P, A, E)
+function is = isBall(P, A, E, MIN_AREA)
     % Determine if the object is ball or not
     % given the perimeter P,
     % area A and eccentricity E of the object
     
     MIN_COMP = 0.94;
-    MIN_AREA = 50;
     MAX_ECC = 0.75;
     MIN_SUM = 1.6;
     MAX_SUM = 1.7;

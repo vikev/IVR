@@ -1,18 +1,18 @@
-function track(file_dir,learnSize,minArea,lookBack,view)
+function track(FILE_DIR,LEARN_SIZE,MIN_AREA,LOOK_BACK,VIEW)
 
 BALL_FOR_SURE = 5;
 
-if minArea<50
-    minArea=50;
+if MIN_AREA < 50
+    MIN_AREA = 50;
 end
 
-filenames = dir([file_dir '*.jpg']);
+filenames = dir([FILE_DIR '*.jpg']);
 
-frame = imread([file_dir filenames(1).name]);
+frame = imread([FILE_DIR filenames(1).name]);
 figure(1);
 
-y = size(frame,1);
-x = size(frame,2);
+y = size(frame, 1);
+x = size(frame, 2);
 
 objects = struct('path', {}, 'lastSeen', {}, 'colour', {}, 'highest', 0, 'box', {}, 'isBall', {}, 'ballCount', 0);
 
@@ -22,37 +22,33 @@ diff = zeros(y, x);
 updated = 0;
 frameD = double(frame);
 
-frameBuff(:,:,:,1)=frameD;
-if(lookBack>0)
-    frameBuff(:,:,:,lookBack)=frameD;
+frameBuff(:, :, :, 1) = frameD;
+if LOOK_BACK > 0
+    frameBuff(:, :, :, LOOK_BACK) = frameD;
 end
 
 % play 'video'
 for k = 1 : size(filenames, 1)
-    frame = imread([file_dir filenames(k).name]);
+    frame = imread([FILE_DIR filenames(k).name]);
     frameD = double(frame);
-    %normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
-    if k<=learnSize
-        updated=updated+1;
-        backgroundSum=frameD+backgroundSum;
+    if k <= LEARN_SIZE
+        updated = updated + 1;
+        backgroundSum = frameD + backgroundSum;
     end
-    if k==learnSize
-        background=backgroundSum/learnSize;
+    if k == LEARN_SIZE
+        background = backgroundSum/LEARN_SIZE;
     end
-    if k>=learnSize && lookBack>0
-        %  background=backgroundSum/updated;
+    % show frame
+    if VIEW == 0
+        imshow(frame);
+    else
+        d=diff*255;
+        
+        f=foreground*255;
+        bwims = cat(2, cat(3,f,f,f), cat(3,d,d,d));
+        imshow(cat(2,frame,bwims));
     end
-     % show frame
-        if view == 0
-            imshow(frame);
-        else
-            d=diff*255;
-            
-            f=foreground*255;
-            bwims = cat(2, cat(3,f,f,f), cat(3,d,d,d));
-            imshow(cat(2,frame,bwims));
-        end
-    if k>learnSize
+    if k>LEARN_SIZE
         props = extractForegroundObjects();
         centres = cat(1, props.Centroid);
         updateObjectsStruct();
@@ -61,11 +57,11 @@ for k = 1 : size(filenames, 1)
         
     end
     
-    if k > learnSize && lookBack > 0
+    if k > LEARN_SIZE && LOOK_BACK > 0
         diff=zeros(y, x);
-        diff(abs(frameD(:, :, 1) - frameBuff(:, :, 1, lookBack)) > 5) = 1;
-        diff(abs(frameD(:, :, 2) - frameBuff(:, :, 2, lookBack)) > 5) = 1;
-        diff(abs(frameD(:, :, 3) - frameBuff(:, :, 3, lookBack)) > 5) = 1;
+        diff(abs(frameD(:, :, 1) - frameBuff(:, :, 1, LOOK_BACK)) > 5) = 1;
+        diff(abs(frameD(:, :, 2) - frameBuff(:, :, 2, LOOK_BACK)) > 5) = 1;
+        diff(abs(frameD(:, :, 3) - frameBuff(:, :, 3, LOOK_BACK)) > 5) = 1;
         diff = bwmorph(diff, 'erode', 2);
         
         if diff == zeros(y,x)
@@ -75,7 +71,7 @@ for k = 1 : size(filenames, 1)
         end
     end
     
-    if lookBack > 0
+    if LOOK_BACK > 0
         updateFrameBuffer();
     end
     %imShow(frame);
@@ -84,7 +80,7 @@ for k = 1 : size(filenames, 1)
     drawnow('expose');
 end
 
-    % this function compares the current frame to the estimated backgroung value and returns the finds foreground objects
+% this function compares the current frame to the estimated backgroung value and returns the finds foreground objects
     function props = extractForegroundObjects()
         foreground = zeros(y,x);
         foreground(abs(frameD(:, :, 1) - background(:, :, 1)) > 8) = 1;
@@ -103,14 +99,14 @@ end
         % Remove small objects (noise)
         rm = [];
         for i = 1 : length(props)
-            if props(i).Area < minArea
+            if props(i).Area < MIN_AREA
                 rm = [rm i];
             end
         end
         props(rm) = [];
     end
 
-    % dispaly paths, centroids and centers for every object in objects struct
+% dispaly paths, centroids and centers for every object in objects struct
     function drawInfo()
         needPause = 0;
         for i = 1 : size(objects, 2)
@@ -144,18 +140,18 @@ end
         end
     end
 
-    % update the buffer for past frames
+% update the buffer for past frames
     function updateFrameBuffer()
-        if lookBack > 1
-            for i = lookBack : -1 : 2
+        if LOOK_BACK > 1
+            for i = LOOK_BACK : -1 : 2
                 frameBuff(:, :, :, i) = frameBuff(:, :, :, i-1);
             end
         end
         frameBuff(:, :, :, 1) = frameD;
     end
 
-    % update the objects structure by assignining/adding the objects
-    % detected in the current frame
+% update the objects structure by assignining/adding the objects
+% detected in the current frame
     function updateObjectsStruct()
         centres = cat(1, props.Centroid);
         
@@ -169,7 +165,7 @@ end
                 if objects(j).lastSeen < k
                     x1 = objects(j).path(end,1);
                     y1 = objects(j).path(end,2);
-                   
+                    
                     dist = distance(x1,c1,y1,c2);
                     
                     if dist < 20 && isCloseRGBVal(objects(j).colour, currCentreColour,5)
@@ -178,7 +174,7 @@ end
                         objects(j).colour = currCentreColour;
                         objects(j).box = props(i).BoundingBox;
                         vel = objects(j).path(end-1, 2) - objects(j).path(end, 2);
-                        if ~objects(j).isBall && vel > -1 && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity)
+                        if ~objects(j).isBall && vel > -1 && isBall(props(i).Perimeter, props(i).Area, props(i).Eccentricity, MIN_AREA)
                             if objects(j).ballCount == BALL_FOR_SURE
                                 objects(j).isBall = true;
                             else
@@ -192,10 +188,10 @@ end
             if ~assigned
                 objects(end + 1) = struct('path', [[c1 c2]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false, 'ballCount', 0);
             end
-        end 
+        end
     end
 
-    % remove lost objects from objects struct
+% remove lost objects from objects struct
     function removeLostObjects()
         rm = [];
         for i = 1 : size(objects, 2)
@@ -208,7 +204,7 @@ end
         objects(rm) = [];
     end
 
-    % check two rgb pixels if they are close enough.
+% check two rgb pixels if they are close enough.
     function is = isCloseRGBVal(pixel1, pixel2,thresh)
         is = true;
         if abs(pixel1(1, 1, 1) - pixel2(1, 1, 1)) > thresh
