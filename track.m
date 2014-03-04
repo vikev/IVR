@@ -25,7 +25,8 @@ if(lookBack>0)
 end
 
 % play 'video'
-for k = 150 : size(filenames, 1)
+for k = 1 : size(filenames, 1)
+    disp(k);
     frame = imread([file_dir filenames(k).name]);
     frameD = double(frame);
     %normalised = bsxfun(@rdivide, im2double(frame), sum(im2double(frame),3,'native'));
@@ -39,12 +40,9 @@ for k = 150 : size(filenames, 1)
     if k>=learnSize && lookBack>0
         %  background=backgroundSum/updated;
     end
-    if k>learnSize
-        props = extractForegroundObjects();
-        % show frame
+     % show frame
         if view == 0
             imshow(frame);
-            
         else
             d=diff*255;
             
@@ -52,6 +50,8 @@ for k = 150 : size(filenames, 1)
             bwims = cat(2, cat(3,f,f,f), cat(3,d,d,d));
             imshow(cat(2,frame,bwims));
         end
+    if k>learnSize
+        props = extractForegroundObjects();
         centres = cat(1, props.Centroid);
         updateObjectsStruct();
         removeLostObjects();
