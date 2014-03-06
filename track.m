@@ -11,6 +11,7 @@ filenames = dir([FILE_DIR '*.jpg']);
 frame = imread([FILE_DIR filenames(1).name]);
 figure(1);
 
+% dimensions of the frame
 y = size(frame, 1);
 x = size(frame, 2);
 
@@ -19,7 +20,6 @@ objects = struct('path', {}, 'lastSeen', {}, 'colour', {}, 'highest', 0, 'box', 
 backgroundSum = double(zeros(y, x, 3));
 foreground = zeros(y, x);
 diff = zeros(y, x);
-updated = 0;
 frameD = double(frame);
 
 frameBuff(:, :, :, 1) = frameD;
@@ -31,8 +31,8 @@ end
 for k = 1 : size(filenames, 1)
     frame = imread([FILE_DIR filenames(k).name]);
     frameD = double(frame);
+    % get the sum of the rgb values of the first 25 (LEARN_SIZE) frames
     if k <= LEARN_SIZE
-        updated = updated + 1;
         backgroundSum = frameD + backgroundSum;
     end
     if k == LEARN_SIZE
@@ -66,8 +66,6 @@ for k = 1 : size(filenames, 1)
         
         if diff == zeros(y,x)
             background = (background + 2*frameD)/3;
-            updated = updated + 1;
-            
         end
     end
     
@@ -80,8 +78,10 @@ for k = 1 : size(filenames, 1)
     drawnow('expose');
 end
 
-% this function compares the current frame to the estimated backgroung value and returns the finds foreground objects
+% this function compares the current frame to the estimated backgroung value and returns the foreground objects
     function props = extractForegroundObjects()
+        % create a binary image with the foreground using background subtraction. 
+        % 0 - background; 1 - foreground.
         foreground = zeros(y,x);
         foreground(abs(frameD(:, :, 1) - background(:, :, 1)) > 8) = 1;
         foreground(abs(frameD(:, :, 2) - background(:, :, 2)) > 8) = 1;
@@ -92,9 +92,9 @@ end
         foreground = bwmorph(foreground, 'close', Inf);
         foreground = medfilt2(foreground);
         
-        % Get information about the objects
+        % Label the object and get their properties
         labels = bwlabel(foreground, 4);
-        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity', 'conveximage', 'MajorAxisLength', 'MinorAxisLength');
+        props = regionprops(labels, 'centroid', 'perimeter', 'area', 'boundingbox', 'eccentricity');
         
         % Remove small objects (noise)
         rm = [];
@@ -126,7 +126,7 @@ end
                 end
                 drawPath(path, 'r');
             end
-            % Draw highest point
+            % Draw highest point if present
             [p1, p2] = size(path);
             if p1 > 2 && objects(i).highest == 0 && objects(i).isBall
                 if drawHighest(path)
@@ -155,12 +155,15 @@ end
     function updateObjectsStruct()
         centres = cat(1, props.Centroid);
         
+        % go through all objects currently detected in the frame
         for i = 1 : size(centres,1)
             assigned = false;
             c1 = min(centres(i, 1),x-1);
             c2 = min(centres(i, 2),y-1);
             centrePixel=im2double(frame(uint8(c1),uint8(c2),:));
             currCentreColour = bsxfun(@rdivide, centrePixel, sum(centrePixel,3,'native'));
+            % scan the objects tracked in the previous frames and update
+            % them
             for j = 1 : size(objects, 2)
                 if objects(j).lastSeen < k
                     x1 = objects(j).path(end,1);
@@ -168,6 +171,9 @@ end
                     
                     dist = distance(x1,c1,y1,c2);
                     
+                    % if the distance between the centres is small and the
+                    % colour is close enough those are the same object.
+                    % Update.
                     if dist < 20 && isCloseRGBVal(objects(j).colour, currCentreColour,5)
                         objects(j).path = [objects(j).path; [c1 c2]];
                         objects(j).lastSeen = k;
@@ -182,10 +188,14 @@ end
                             end
                         end
                         assigned = true;
+                        break;
                     end
                 end
             end
-            if ~assigned
+            % if this is a new object near the edges of the frame (prevents
+            % adding detections caused by noise in the middle of the frame) create
+            % new instance for it
+            if ~assigned && (c2>y-20||c1<20||c1>x-20)
                 objects(end + 1) = struct('path', [[c1 c2]], 'lastSeen', k, 'colour', currCentreColour, 'highest', 0, 'box', props(i).BoundingBox, 'isBall', false, 'ballCount', 0);
             end
         end
